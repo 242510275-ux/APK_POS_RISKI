@@ -1,0 +1,25 @@
+ini disimpan di routes/web.php
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
+Route::get('/kosongkan-toko', function () {
+    // 1. Matikan pengecekan foreign key sementara agar tidak error saat dikosongkan
+    DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+    // 2. Kosongkan tabel transaksi (urut dari detail transaksi ke induknya)
+    DB::table('item_penjualan')->truncate();
+    DB::table('penjualan')->truncate();
+    
+    // 3. Kosongkan tabel produk
+    DB::table('produk')->truncate();
+
+    // 4. Hidupkan kembali pengecekan foreign key demi keamanan database
+    DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+    // 5. Opsional: Hapus semua file gambar produk fisik yang tersimpan di folder storage
+    // Pastikan folder di bawah ini sesuai dengan folder penyimpanan foto produk Anda
+    Storage::disk('public')->deleteDirectory('products'); 
+
+    return "Semua data produk, gambar produk, dan riwayat transaksi penjualan BERHASIL DIKOSONGKAN TOTAL!";
+});
