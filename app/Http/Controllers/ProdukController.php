@@ -132,15 +132,26 @@ return redirect()->route('produk.edit', $produk->id)->with('success', 'Product u
      * Remove the specified resource from storage.
      */
     public function destroy(Produk $produk)
-    {
-        $this->authorize('delete', $produk);
+{
+    $this->authorize('delete', $produk);
 
-        if ($produk->foto) {
-    Storage::disk('public')->delete($produk->foto);
-}
-
-$produk->delete();
-return redirect()->route('produk.index')->with('success', 'Product deleted successfully.');
-
+    // Cek apakah produk sudah digunakan dalam transaksi
+    if ($produk->itemPenjualan()->exists()) {
+        return redirect()
+            ->route('produk.index')
+            ->with('error', 'Produk tidak dapat dihapus karena sudah digunakan dalam transaksi penjualan.');
     }
+
+    // Hapus foto jika ada
+    if ($produk->foto) {
+        Storage::disk('public')->delete($produk->foto);
+    }
+
+    // Hapus produk
+    $produk->delete();
+
+    return redirect()
+        ->route('produk.index')
+        ->with('success', 'Product deleted successfully.');
+}
 }

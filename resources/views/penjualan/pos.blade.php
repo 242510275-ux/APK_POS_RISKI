@@ -124,11 +124,30 @@
                     onsubmit="return confirm('Yakin ingin checkout?')" class="mt-2">
                 @csrf
                 @method('PUT')
-                <select name="payment_method" class="form-select mb-2">
-                    <option value="">Pilih Pembayaran</option>
-                    <option value="CASH">CASH</option>
-                    <option value="QRIS">QRIS</option>
-                </select>
+                <select name="payment_method" id="payment_method" class="form-select mb-2">
+    <option value="">Pilih Pembayaran</option>
+    <option value="CASH">CASH</option>
+    <option value="QRIS">QRIS</option>
+</select>
+
+{{-- QRIS --}}
+<div id="qris-container" class="text-center mt-3" style="display: none;">
+    <div class="card border-success">
+        <div class="card-body">
+            <h6 class="fw-bold">Pembayaran QRIS</h6>
+
+            <p class="text-muted mb-2">
+                Silakan scan QRIS berikut
+            </p>
+
+            <img src="{{ asset('image/qris.jpg') }}">
+                 
+            <p class="small text-muted mt-2 mb-0">
+                Scan menggunakan aplikasi pembayaran kamu
+            </p>
+        </div>
+    </div>
+</div>
 
                 <button class="btn btn-success w-100 {{ $sale->status === 'COMPLETED' ? 'disabled' : '' }}">
                     Checkout
@@ -152,6 +171,21 @@
 
 </div>
 @endsection
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const paymentMethod = document.getElementById('payment_method');
+    const qrisContainer = document.getElementById('qris-container');
+
+    paymentMethod.addEventListener('change', function () {
+        if (this.value === 'QRIS') {
+            qrisContainer.style.display = 'block';
+        } else {
+            qrisContainer.style.display = 'none';
+        }
+    });
+});
+</script>
 
 
 

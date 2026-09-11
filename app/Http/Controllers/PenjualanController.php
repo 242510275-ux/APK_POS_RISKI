@@ -148,31 +148,34 @@ return view('penjualan.pos', compact('sale', 'products', 'mode'));
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Penjualan $penjualan)
-    {
-        $this->authorize('delete', $penjualan);
-                // ! Pastikan hanya transaksi OPEN
-        if ($penjualan->status != 'OPEN') {
-            return redirect()->route('penjualan.index')->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
-        }
-
-        DB::transaction(function () use ($penjualan) {
-
-            foreach ($penjualan->itemPenjualan as $item) {
-                // 🔺 kembalikan stok
-                $item->produk->increment('stok', $item->kuantitas);
-            }
-
-            // ❌ hapus item
-            $penjualan->itemPenjualan()->delete();
-
-            // ❌ hapus penjualan
-            $penjualan->delete();
-        });
-
+   public function destroy(Penjualan $penjualan)
+{
+    // Cek status terlebih dahulu
+    if ($penjualan->status !== 'OPEN') {
         return redirect()
             ->route('penjualan.index')
-            ->with('success', 'Transaksi berhasil dibatalkan');
-
+            ->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
     }
+
+    // Cek hak akses
+    $this->authorize('delete', $penjualan);
+
+    DB::transaction(function () use ($penjualan) {
+
+        // Kembalikan stok
+        foreach ($penjualan->itemPenjualan as $item) {
+            $item->produk->increment('stok', $item->kuantitas);
+        }
+
+        // Hapus item penjualan
+        $penjualan->itemPenjualan()->delete();
+
+        // Hapus penjualan
+        $penjualan->delete();
+    });
+
+    return redirect()
+        ->route('penjualan.index')
+        ->with('success', 'Transaksi berhasil dibatalkan');
+}
 }

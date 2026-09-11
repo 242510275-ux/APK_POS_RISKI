@@ -86,9 +86,13 @@ class UserController extends Controller
 
     }
     public function destroy(User $user)
-    {
-        $user->delete();
-
-        return back()->with('success', 'User deleted');
+{
+    if ($user->penjualan()->exists()) {
+        return back()->with('error', 'User tidak dapat dihapus karena masih memiliki data penjualan.');
     }
+
+    $user->delete();
+
+    return back()->with('success', 'User berhasil dihapus.');
+}
 }
